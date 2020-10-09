@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title> Tetrix </title>
+
+<script type="text/javascript" src="https://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SEVENTH_EDITION/CODE/Common/MV.js"></script> 		
+<script type="text/javascript" src="tetrix.js"></script>
+</head>
+<body>
+    <h1 align="center"> Tetrix </h1>
+    <h3 align="center"> Select the number of subdivisions: <label id="lvl">1</label> </h3>
+    <p align="center"><input id="slider" type="range" min="0" max="8" step="1" value="1">
+    
+    </p>
+    <p align="center">
+        <canvas id="gl-canvas" width="640" height="400" style="border:1px solid #000000;">	
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </p>
+    
+
+    <div align="center">
+		<button id = "x-axis" class="favorite styled" type="button">
+			Rotate around X axis
+		</button>
+		<button id = "y-axis" class="favorite styled" type="button">
+			Rotate around Y axis
+		</button>
+		<button id = "z-axis" class="favorite styled" type="button">
+			Rotate around Z axis
+        </button>
+        <button id = "no-axis" class="favorite styled" type="button">
+			Don't rotate
+		</button>
+    </div>
+
+    
+</body>
+</html>

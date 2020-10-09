@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title> Mandelbrot </title>
+
+<script type="text/javascript" src="https://www.cs.unm.edu/~angel/BOOK/INTERACTIVE_COMPUTER_GRAPHICS/SEVENTH_EDITION/CODE/Common/MV.js"></script> 		
+<script type="text/javascript" src="mandelbrot.js"></script>
+</head>
+<body>
+    <h1 align="center"> Mandelbrot </h1>
+    <h3 align="center"> Select the threshold value (maximum number of iterations): <label id="threshold">50</label> </h3>
+    <p align="center"><input id="slider" type="range" min="10" max="120" step="10" value="50">
+    
+    </p>
+    <p align="center">
+        <canvas id="gl-canvas" width="500" height="500" style="border:1px solid #000000;">	
+            Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </p>    
+</body>
+</html>
