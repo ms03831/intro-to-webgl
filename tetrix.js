@@ -1,36 +1,39 @@
-var axis = 1; // 0 for X, 1 for Y, 2 for Z, -1 for no rotation 
-var angleX = 0; //initially the angle is zero 
+var axis = 0; // 0 for X, 1 for Y, 2 for Z, -1 for no rotation
+var angleX = 0; //initially the angle is zero
 var angleY = 0;
 var angleZ = 0;
-var gl;
 var points = [];
 var colors = [];
 var colorBuffer;
+var gl;
 var vertexBuffer;
 var vertexColor;
 var vertexPosition;
-var subdivisionLevel = 2;
+var subdivisionLevel = 1;
 // for location of rotationMatrix on GPU
-var rotationMatrixLoc; 
+var rotationMatrixLoc;
 
 //default rotation matrix, which doesn't rotate the point
-var rotationCPU = mat4( 1.0, 0.0, 0.0, 0.0,
-                        0.0,  1.0, 0.0, 0.0,
-                        0.0,  0.0, 1.0, 0.0,
-                        0.0,  0.0, 0.0, 1.0 );
+var rotationCPU = mat4(
+                    1.0,  0.0, 0.0, 0.0,
+                    0.0,  1.0, 0.0, 0.0,
+                    0.0,  0.0, 1.0, 0.0,
+                    0.0,  0.0, 0.0, 1.0
+                );
 
-// initial vertices
+// initial vertices to make a regular tetrahedron, vertices calculated as
+// outlined here https://en.wikipedia.org/wiki/Tetrahedron#Coordinates_for_a_regular_tetrahedron
 var vertices = [
-    vec4(  0.2, 0.7, -0.7, 1.0 ),
-	vec4(  -0.7, 0.7, 0.7, 1.0 ),
-	vec4(  0.7,  0.7, 0.7, 1.0 ),
-	vec4(  0.2, -0.7,  0.2, 1.0)	
+    vec4(  0.9428,     0.0, -0.33, 1.0 ) ,
+    vec4( -0.4714,  0.8165, -0.33, 1.0 ),
+	vec4( -0.4714, -0.8165, -0.33, 1.0 ),
+    vec4(     0.0,     0.0,   1.0, 1.0 )
 ];
 
-var RED = vec4( 1.0, 0.0, 0.0, 1.0 );
-var GREEN = vec4( 0.0, 1.0, 0.0, 1.0 );
-var BLUE = vec4( 0.0, 0.0, 1.0, 1.0 );
-var BLACK = vec4( 0.0, 0.0, 0.0, 0.3 );
+var RED     = vec4( 1.0, 0.0, 0.0, 1.0 );
+var GREEN   = vec4( 0.0, 1.0, 0.0, 1.0 );
+var BLUE    = vec4( 0.0, 0.0, 1.0, 1.0 );
+var BLACK   = vec4( 0.0, 0.0, 0.0, 0.3 );
 
 //Vertex Shader code
 var vertexShader = `
@@ -58,15 +61,15 @@ void main()
 window.onload = function init(){
 	var canvas = document.getElementById( "gl-canvas" );
 	gl = canvas.getContext("webgl");
-    if ( !gl ) { 
-        alert( "WebGL isn't available" ); 
+    if ( !gl ) {
+        alert( "WebGL isn't available" );
     }
 
     document.getElementById("x-axis").onclick = function() { axis = 0; } //angleX = 0 };
     document.getElementById("y-axis").onclick = function() { axis = 1; } //angleY = 0 };
     document.getElementById("z-axis").onclick = function() { axis = 2; } //angleZ = 0 };
     document.getElementById("no-axis").onclick = function() { axis = -1; }//angleX = 0; angleY = 0; angleZ = 0; };
-    
+
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 1.0, 1.0, 1.0, 1.0 );
     gl.enable(gl.DEPTH_TEST);
@@ -90,8 +93,8 @@ window.onload = function init(){
     // this tells the attribute how to get data out of color buffer
     gl.vertexAttribPointer( vertexColor, 4, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vertexColor );
- 
-    // Bind the vertex position buffer. 
+
+    // Bind the vertex position buffer.
     gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
     vertexPosition = gl.getAttribLocation( program, "vertexPosition" );
@@ -103,10 +106,10 @@ window.onload = function init(){
     var slider = document.getElementById('slider');
     slider.onchange = function() {
         subdivisionLevel = slider.value;
-        points = []; 
+        points = [];
         colors = [];
         document.getElementById("lvl").innerHTML = subdivisionLevel;
-        tetrixRecursive(vertices[0], vertices[1], vertices[2], vertices[3], subdivisionLevel);    
+        tetrixRecursive(vertices[0], vertices[1], vertices[2], vertices[3], subdivisionLevel);
     }
     tetrixRecursive(vertices[0], vertices[1], vertices[2], vertices[3], subdivisionLevel);
     render();
@@ -119,9 +122,16 @@ function createShaderHelper(sourceString, vertex = true){
     return shader;
 }
 
+// to calculate the mid-point of vertices a and b
+function midPoint(a, b){
+    mid = [];
+    for (let i = 0; i < a.length; i++) mid.push((a[i] + b[i])/2);
+    return mid;
+}
+
 /* main function for recursive division, takes four points
 of the tetrahedron and divides it into more tetrahedrons
-until level 0 is reached. 
+until level 0 is reached.
 */
 function tetrixRecursive(left, right, top, back, level){
     if (level == 0){
@@ -129,14 +139,14 @@ function tetrixRecursive(left, right, top, back, level){
         return;
     }
     else{
-        var leftRight = mix(left, right, 0.5);
-        var leftTop = mix(left, top, 0.5);
-        var leftBack = mix(left, back, 0.5);
+        var leftRight = midPoint(left, right);
+        var leftTop = midPoint(left, top);
+        var leftBack = midPoint(left, back);
         tetrixRecursive( left, leftRight, leftTop, leftBack, level - 1);
-        var rightTop = mix(right, top, 0.5);
-        var rightBack = mix(right, back, 0.5);
+        var rightTop = midPoint(right, top);
+        var rightBack = midPoint(right, back);
         tetrixRecursive( leftRight, right, rightTop, rightBack, level - 1);
-        var topBack = mix(top, back, 0.5);
+        var topBack = midPoint(top, back);
         tetrixRecursive( leftTop, rightTop, top, topBack, level - 1);
         tetrixRecursive( leftBack, rightBack, topBack, back, level - 1);
     }
@@ -158,28 +168,29 @@ function triangle(left, right, top, color){
 function render()
 {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    
+
     switch (axis) {
         case -1:
+//            angleX = angleY = angleZ = 0;
             break;
-        case 0: 
+        case 0:
             angleX += 1;
             break;
-        case 1: 
+        case 1:
             angleY += 1;
             break;
-        case 2: 
+        case 2:
             angleZ += 1;
             break;
     };
-    
+
     // Bind the color buffer.
     gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
     // this tells the attribute how to get data out of color buffer
     //gl.vertexAttribPointer( vertexColor, 4, gl.FLOAT, false, 0, 0 );
     gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
-    
-    // Bind the vertex position buffer. 
+
+    // Bind the vertex position buffer.
     gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
     // this tells the attribute how to get data out of vertex buffer
     //gl.vertexAttribPointer( vertexPosition, 4, gl.FLOAT, false, 0, 0 );
@@ -193,5 +204,5 @@ function render()
 }
 
 function getRotationMatrix(){
-    return mult(mult(rotateX(angleX), rotateY(angleY)), rotateZ(angleZ))
+    return mult(rotateZ(angleZ), mult(rotateY(angleY), rotateX(angleX)))
 }
