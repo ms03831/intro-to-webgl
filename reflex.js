@@ -142,13 +142,6 @@ function render()
                 lastThree = 3;
             }
 
-            generatePolygon();
-            requestAnimationFrame(render);
-            timeRemaining = 30 - timeElapsed();
-            //console.log(timeRemaining);
-            document.getElementById("time").innerHTML = "00:" + Math.floor(timeRemaining);
-            document.getElementById("score").innerHTML = score;
-
             if (score < 0 || Math.floor(timeRemaining) < 0){
                 if (score < 0) document.getElementById("game-status").innerHTML = "Game Over! You lost";
                 else document.getElementById("game-status").innerHTML = "Game Over! You won";
@@ -157,6 +150,15 @@ function render()
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 return;
             }
+
+            generatePolygon();
+            requestAnimationFrame(render);
+            timeRemaining = 30 - timeElapsed();
+            //console.log(timeRemaining);
+            document.getElementById("time").innerHTML = "00:" + Math.floor(timeRemaining);
+            document.getElementById("score").innerHTML = score;
+
+
 
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             // Bind the color buffer.
