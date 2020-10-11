@@ -134,6 +134,14 @@ function render()
             if (!currentPolyHit){
                 lastThree--;
             }
+
+            if (lastThree < 1){
+                size = ((size < 0.38) ? size + 0.02 : size);
+                score--;
+                speed = ((speed > 2) ? speed - 1 : speed);
+                lastThree = 3;
+            }
+
             generatePolygon();
             requestAnimationFrame(render);
             timeRemaining = 30 - timeElapsed();
@@ -162,14 +170,6 @@ function render()
             gl.vertexAttribPointer( vertexPosition, 4, gl.FLOAT, false, 0, 0 );
             gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
             gl.drawArrays(gl.TRIANGLES, 0, points.length);
-
-            if (lastThree < 1){
-                size = ((size < 0.38) ? size + 0.02 : size);
-                score--;
-                speed = ((speed > 2) ? speed - 1 : speed);
-                lastThree = 3;
-            }
-
         }, 5000/speed);
     }
 }
