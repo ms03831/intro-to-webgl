@@ -13,7 +13,7 @@ var timeRemaining = 30.0
 var RED = vec4( 1.0, 0.0, 0.0, 1.0 );
 var GREEN = vec4( 0.0, 1.0, 0.0, 1.0 );
 var startTime, endTime;
-var currentPolyHit = false;
+var currentPolyHit = true;
 var lastThree = 3;
 var pauseAnimation = false;
 
@@ -82,7 +82,6 @@ window.onload = function init(){
 
 function generatePolygon(){
     currentPolyHit = false;
-    lastThree--;
     type = Math.floor(Math.random() * 2); //0 for triangle, 1 for rectangle
     points = [];
     colors = [];
@@ -132,10 +131,13 @@ function render()
 {
     if (!pauseAnimation){
         setTimeout(function() {
+            if (!currentPolyHit){
+                lastThree--;
+            }
             generatePolygon();
             requestAnimationFrame(render);
             timeRemaining = 30 - timeElapsed();
-            console.log(timeRemaining);
+            //console.log(timeRemaining);
             document.getElementById("time").innerHTML = "00:" + Math.floor(timeRemaining);
             document.getElementById("score").innerHTML = score;
 
@@ -147,6 +149,7 @@ function render()
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 return;
             }
+
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             // Bind the color buffer.
             gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
