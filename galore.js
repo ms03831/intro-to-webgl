@@ -76,6 +76,7 @@ window.onload = function init(){
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.0, 0.0, 0.0, 0.6 );
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
     var program = gl.createProgram();
@@ -114,6 +115,12 @@ window.onload = function init(){
         }
         //switch mode
         else if (event.key === 'T' || event.key === 't'){
+            if (tempPoints.length == 3 && mode == QUAD_MODE) {
+            //a quad is basically two triangles
+            nTriangles += 1;
+            tempPoints = [];
+            tempColors = [];
+            }
             mode = 1 - mode;
         }
     }
@@ -152,6 +159,8 @@ function createShaderHelper(sourceString, vertex = true){
 
 function render()
 {
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
     if (tempPoints.length > 0){
         // Bind the color buffer.
         gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
@@ -165,6 +174,7 @@ function render()
         gl.bufferData( gl.ARRAY_BUFFER, flatten(tempPoints), gl.STATIC_DRAW );
         gl.drawArrays(gl.POINTS, 0, tempPoints.length);
     }
+
     // Bind the color buffer.
     gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
     // this tells the attribute how to get data out of color buffer
@@ -184,6 +194,6 @@ function render()
     else {
         gl.drawArrays( gl.TRIANGLES, 0, points.length);
     }
-    console.log(points.length);
+    requestAnimationFrame(render);
 }
 
