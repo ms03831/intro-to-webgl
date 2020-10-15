@@ -202,11 +202,15 @@ function checkMousePosition(canvas, e){
             speed = ((speed < 10) ? speed + 1 : speed);
             lastThree = 3;
             size = ((size > 0.18) ? size - 0.02 : size);
+            points = [];
+            colors = [];
         }
         else{
             size = ((size < 0.38) ? size + 0.02 : size);
             score--;
             speed = ((speed > 2) ? speed - 1 : speed);
+            points = [];
+            colors = [];
         }
     }
 }
