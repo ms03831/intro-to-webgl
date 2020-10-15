@@ -12,6 +12,15 @@ var vertexPosition;
 var subdivisionLevel = 1;
 // for location of rotationMatrix on GPU
 var rotationMatrixLoc;
+var left, right, top, back;
+
+//these four triangles make up a tetrahedron
+var triangles = [
+    0, 1, 2,
+    1, 2, 3,
+    2, 3, 0,
+    3, 0, 1
+]
 
 //default rotation matrix, which doesn't rotate the point
 var rotationCPU = mat4(
@@ -26,7 +35,7 @@ var rotationCPU = mat4(
 var vertices = [
     vec4(  0.9428,     0.0, -0.33, 1.0 ) ,
     vec4( -0.4714,  0.8165, -0.33, 1.0 ),
-	vec4( -0.4714, -0.8165, -0.33, 1.0 ),
+    vec4( -0.4714, -0.8165, -0.33, 1.0 ),
     vec4(     0.0,     0.0,   1.0, 1.0 )
 ];
 
@@ -43,8 +52,8 @@ varying vec4 color;
 uniform mat4 rotationMatrix;
 void main()
 {
-	gl_Position = rotationMatrix * vertexPosition;
-	color = vertexColor;
+    gl_Position = rotationMatrix * vertexPosition;
+    color = vertexColor;
 }
 `
 
@@ -54,13 +63,13 @@ precision mediump float;
 varying vec4 color;
 void main()
 {
-	gl_FragColor = color;
+    gl_FragColor = color;
 }
 `
 
 window.onload = function init(){
-	var canvas = document.getElementById( "gl-canvas" );
-	gl = canvas.getContext("webgl");
+    var canvas = document.getElementById( "gl-canvas" );
+    gl = canvas.getContext("webgl");
     if ( !gl ) {
         alert( "WebGL isn't available" );
     }
@@ -82,6 +91,8 @@ window.onload = function init(){
     gl.attachShader( program, fragShdr );
     gl.linkProgram( program );
     gl.useProgram( program );
+
+    tetrixRecursive(vertices[0], vertices[1], vertices[2], vertices[3], subdivisionLevel);
 
     colorBuffer = gl.createBuffer();
     vertexBuffer = gl.createBuffer();
@@ -110,8 +121,17 @@ window.onload = function init(){
         colors = [];
         document.getElementById("lvl").innerHTML = subdivisionLevel;
         tetrixRecursive(vertices[0], vertices[1], vertices[2], vertices[3], subdivisionLevel);
+
+        // Bind the color buffer.
+        gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
+        // this tells the attribute how to get data out of color buffer
+        gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
+
+        // Bind the vertex position buffer.
+        gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
+        // this tells the attribute how to get data out of vertex buffer
+        gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
     }
-    tetrixRecursive(vertices[0], vertices[1], vertices[2], vertices[3], subdivisionLevel);
     render();
 }
 
@@ -153,17 +173,18 @@ function tetrixRecursive(left, right, top, back, level){
 }
 
 function tetrix(left, right, top, back){
-    triangle(left, right, top, RED);
-    triangle(right, top, back, BLUE);
-    triangle(top, back, left, GREEN);
-    triangle(back, left, right, BLACK);
+    var vertexIndices = {
+        0: left,
+        1: right,
+        2: top,
+        3: back
+    }
+    for (let i = 0; i < triangles.length; i++) points.push(vertexIndices[triangles[i]]);
+    colors.push(RED, RED, RED);
+    colors.push(BLUE, BLUE, BLUE);
+    colors.push(GREEN, GREEN, GREEN);
+    colors.push(BLACK, BLACK, BLACK);
 }
-
-function triangle(left, right, top, color){
-    points.push(left, right, top);
-    colors.push(color, color, color);
-}
-
 
 function render()
 {
@@ -183,19 +204,6 @@ function render()
             angleZ += 1;
             break;
     };
-
-    // Bind the color buffer.
-    gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
-    // this tells the attribute how to get data out of color buffer
-    //gl.vertexAttribPointer( vertexColor, 4, gl.FLOAT, false, 0, 0 );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
-
-    // Bind the vertex position buffer.
-    gl.bindBuffer( gl.ARRAY_BUFFER, vertexBuffer );
-    // this tells the attribute how to get data out of vertex buffer
-    //gl.vertexAttribPointer( vertexPosition, 4, gl.FLOAT, false, 0, 0 );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW );
-
 
     rotationCPU = getRotationMatrix()
     gl.uniformMatrix4fv(rotationMatrixLoc, false, flatten(rotationCPU));
