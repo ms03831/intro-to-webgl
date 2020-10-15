@@ -16,7 +16,6 @@ var startTime, endTime;
 var currentPolyHit = true;
 var lastThree = 3;
 var pauseAnimation = false;
-
 //Vertex Shader code
 var vertexShader = `
 attribute vec4 vertexPosition;
@@ -155,9 +154,8 @@ function render()
 
             generatePolygon();
             requestAnimationFrame(render);
-            timeRemaining = 30 - timeElapsed();
             document.getElementById("time").innerHTML = "00:" + Math.floor(timeRemaining);
-
+            timeRemaining = 30 - timeElapsed();
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             // Bind the color buffer.
             gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
@@ -199,19 +197,18 @@ function checkMousePosition(canvas, e){
         var hit = isInside(x, y, points, type);
         if (hit){
             score++;
-            speed = ((speed < 10) ? speed + 1 : speed);
+            speed = ((speed < 10) ? speed + 0.5 : speed);
             lastThree = 3;
             size = ((size > 0.18) ? size - 0.02 : size);
-            points = [];
-            colors = [];
         }
         else{
             size = ((size < 0.38) ? size + 0.02 : size);
             score--;
-            speed = ((speed > 2) ? speed - 1 : speed);
-            points = [];
-            colors = [];
+            speed = ((speed > 2) ? speed - 0.5 : speed);
         }
+        points = [];
+        colors = [];
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
 }
 
