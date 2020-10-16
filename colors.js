@@ -1,21 +1,26 @@
-var gl;
+var gl; //for webgl context
+
+//buffers
 var colorBuffer;
 var triangleVertexBufferObject;
+
+//attribute locations
 var vertexPosition;
 var vertexColor;
 
+//triangle vertices
 var triangleVertices =	[
 	vec4(-0.5, -0.5, 0.0, 1.0),
 	vec4(0.0, 0.5, 0.0, 1.0),
 	vec4(0.5, -0.5, 0.0, 1.0)
 ];
 
-
+//initially boundary and interior vertices are similar to maxwell's triangle
 var RED = vec4( 1.0, 0.0, 0.0, 1.0 );
 var GREEN = vec4( 0.0, 1.0, 0.0, 1.0 );
 var BlUE = vec4( 0.0, 0.0, 1.0, 1.0 );
 
-var colors = [RED, GREEN, BlUE];
+//draws interior by default
 var interiorColors = [
 	RED, GREEN, BlUE
 ];
@@ -70,14 +75,15 @@ var BI3 = document.getElementById("blueB3");
 var GI3 = document.getElementById("greenB3");
 
 window.onload = function init(){
-	var canvas = document.getElementById('gl-canvas');
-	gl = canvas.getContext('webgl');
+	//get canvas and webgl context
+	var canvas = document.getElementById( "gl-canvas" );
+	gl = canvas.getContext("webgl");
+    if ( !gl ) {
+        alert( "WebGL isn't available" );
+    }
 
-	if (!gl)
-	{
-		alert('Your browser does not support WebGL');
-	}
-	gl.clearColor(0.0, 0.0, 0.0, 0.6);
+    //clear canvas
+   	gl.clearColor(0.0, 0.0, 0.0, 0.6);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	// Create shaders and program
@@ -90,29 +96,37 @@ window.onload = function init(){
     gl.linkProgram( program );
     gl.useProgram( program );
 
-	// Create buffer
+	// Create buffers
 	colorBuffer = gl.createBuffer();
+	triangleVertexBufferObject = gl.createBuffer();
+
+	//bind color buffer
 	gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
     vertexColor = gl.getAttribLocation(program, 'vertexColor');
+    // this tells the attribute how to get data out of color buffer
 	gl.vertexAttribPointer( vertexColor, 4, gl.FLOAT, false, 0, 0 );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
+	//draws interior by default
+    gl.bufferData( gl.ARRAY_BUFFER, flatten(interiorColors), gl.STATIC_DRAW );
 
-	triangleVertexBufferObject = gl.createBuffer();
+	//bind vertex buffer
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
 	vertexPosition = gl.getAttribLocation(program, 'vertexPosition');
+    // this tells the attribute how to get data out of vertex buffer
 	gl.vertexAttribPointer( vertexPosition, 4, gl.FLOAT, false, 0, 0 );
 	gl.bufferData(gl.ARRAY_BUFFER, flatten(triangleVertices), gl.STATIC_DRAW);
 
-
 	gl.enableVertexAttribArray(vertexPosition);
 	gl.enableVertexAttribArray(vertexColor);
+
 	render();
 };
 
+//get value correponding to slider element and map it to [0, 1]
 function getColorValue(element){
 	return parseInt(element.value)/255.0;
 }
 
+//update boundary colors when boudary sliders are changed
 function updateBoundaryColors(){
 	var colorV1 = vec4(	getColorValue(redB1),
 		 				getColorValue(greenB1),
@@ -132,6 +146,7 @@ function updateBoundaryColors(){
 	boundaryColors = [colorV1, colorV2, colorV3];
 }
 
+//update interior colors when interior sliders are changed
 function updateInteriorColors(){
 	var colorV1 = vec4(	getColorValue(redI1),
 		 				getColorValue(greenI1),
@@ -151,24 +166,28 @@ function updateInteriorColors(){
 	interiorColors = [colorV1, colorV2, colorV3];
 }
 
-
+//this function is called at start and each time
+//a value of slider or switch changes
 function render(){
 	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	//get switches for boundary and interior
 	var boundary = document.getElementById("boundary");
 	var interior = document.getElementById("interior");
+
 	if (boundary.checked == true)
 	{
 		updateBoundaryColors()
+		//bind buffer again for updated colors
 		gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
-		console.log("what")
 		gl.vertexAttribPointer( vertexColor, 4, gl.FLOAT, false, 0, 0 );
 	    gl.bufferData( gl.ARRAY_BUFFER, flatten(boundaryColors), gl.STATIC_DRAW );
 	    gl.drawArrays(gl.LINE_LOOP, 0, triangleVertices.length);
 	}
 
 	if (interior.checked == true){
-		console.log("what")
 		updateInteriorColors()
+		//bind buffer again for updated colors
 		gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
 		gl.vertexAttribPointer( vertexColor, 4, gl.FLOAT, false, 0, 0 );
 	    gl.bufferData( gl.ARRAY_BUFFER, flatten(interiorColors), gl.STATIC_DRAW );
@@ -176,60 +195,11 @@ function render(){
 	}
 };
 
-// var createBuff = function()
-// {
-// 		//
-// 	// Create buffer
-// 	//
-// 	var triangleVertices =
-// 	[ // X, Y,       R, G, B
-// 		0.0, 0.5,    1.0, 0.0, 0.0,
-// 		-0.5, -0.5,  0.0, 0.0, 1.0,
-// 		0.5, -0.5,   0.0, 1.0, 0.0
-// 	];
-
-// 	var triangleVertexBufferObject = gl.createBuffer();
-// 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexBufferObject);
-// 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(triangleVertices), gl.STATIC_DRAW);
-// 	gl.bindBuffer( gl.ARRAY_BUFFER, colorBuffer );
-//     gl.bufferData( gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW );
-// 	var positionAttribLocation = gl.getAttribLocation(program, 'vertPosition');
-// 	var colorAttribLocation = gl.getAttribLocation(program, 'vertColor');
-
-// 	// this tells the attribute how to get data out of vertex buffer
-// 	gl.vertexAttribPointer
-// 	(
-// 		positionAttribLocation, // Attribute location
-// 		4, // Number of elements per attribute
-// 		gl.FLOAT, // Type of elements
-// 		gl.FALSE,
-// 		5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-// 		0 // Offset from the beginning of a single vertex to this attribute
-// 	);
-
-// 	// this tells the attribute how to get data out of color buffer
-// 	gl.vertexAttribPointer
-// 	(
-// 		colorAttribLocation, // Attribute location
-// 		3, // Number of elements per attribute
-// 		gl.FLOAT, // Type of elements
-// 		gl.FALSE,
-// 		5 * Float32Array.BYTES_PER_ELEMENT, // Size of an individual vertex
-// 		2 * Float32Array.BYTES_PER_ELEMENT // Offset from the beginning of a single vertex to this attribute
-// 	);
-
-// 	gl.enableVertexAttribArray(positionAttribLocation);
-// 	gl.enableVertexAttribArray(colorAttribLocation);
-
-
-// 	// Main render loop
-
-// 	gl.useProgram(program);
-// }
-
-
+//helper function for creating a shader from its source string
 function createShaderHelper(sourceString, vertex = true){
-    var shader = ((vertex) ? gl.createShader( gl.VERTEX_SHADER ) : gl.createShader( gl.FRAGMENT_SHADER ));
+    //if vertex shader, create vertex shader else framgent shader
+    var shader = ((vertex) ? gl.createShader( gl.VERTEX_SHADER ) :
+                            gl.createShader( gl.FRAGMENT_SHADER ));
     gl.shaderSource( shader, sourceString );
     gl.compileShader( shader );
     return shader;
