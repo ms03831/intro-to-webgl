@@ -32,11 +32,18 @@ var rotationCPU = mat4(
 
 // initial vertices to make a regular tetrahedron, vertices calculated as
 // outlined here https://en.wikipedia.org/wiki/Tetrahedron#Coordinates_for_a_regular_tetrahedron
+// var vertices = [
+//     vec4(  0.9428,     0.0, -0.33, 1.0 ) ,
+//     vec4( -0.4714,  0.8165, -0.33, 1.0 ),
+//     vec4( -0.4714, -0.8165, -0.33, 1.0 ),
+//     vec4(     0.0,     0.0,   1.0, 1.0 )
+// ];
+
 var vertices = [
-    vec4(  0.9428,     0.0, -0.33, 1.0 ) ,
-    vec4( -0.4714,  0.8165, -0.33, 1.0 ),
-    vec4( -0.4714, -0.8165, -0.33, 1.0 ),
-    vec4(     0.0,     0.0,   1.0, 1.0 )
+    vec4(0.0000, 0.0000, 1.0000, 1.0),
+    vec4(0.0000, 0.9428, -0.3333, 1.0),
+    vec4(-0.8165, -0.4714, -0.3333, 1.0),
+    vec4(0.8165, -0.4714, -  0.3333, 1.0),
 ];
 
 var RED     = vec4( 1.0, 0.0, 0.0, 1.0 );
