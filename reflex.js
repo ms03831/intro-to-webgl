@@ -130,6 +130,7 @@ function render()
 {
     if (!pauseAnimation){
         setTimeout(function() {
+            document.getElementById("game-status").innerHTML = "Playing";
             if (!currentPolyHit){
                 lastThree--;
             }
@@ -144,17 +145,18 @@ function render()
             document.getElementById("score").innerHTML = score;
 
             if (score < 0 || Math.floor(timeRemaining) < 0){
-                if (score < 0) document.getElementById("game-status").innerHTML = "Game Over! You lost";
-                else document.getElementById("game-status").innerHTML = "Game Over! You won";
-                document.getElementById("time").innerHTML = "00:00"
+                if (score < 0)
+                    document.getElementById("game-status").innerHTML = "Game Over! You lost";
+                else
+                    document.getElementById("game-status").innerHTML = "Game Over! You won";
+                document.getElementById("time").innerHTML = "0 seconds left"
                 pauseAnimation = true;
                 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
                 return;
             }
-
             generatePolygon();
             requestAnimationFrame(render);
-            document.getElementById("time").innerHTML = "00:" + Math.floor(timeRemaining);
+            document.getElementById("time").innerHTML = Math.floor(timeRemaining) + " seconds left";
             timeRemaining = 30 - timeElapsed();
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             // Bind the color buffer.
@@ -198,17 +200,18 @@ function checkMousePosition(canvas, e){
         if (hit){
             score++;
             speed = ((speed < 10) ? speed + 0.5 : speed);
-            lastThree = 3;
-            size = ((size > 0.18) ? size - 0.02 : size);
+            size = ((size > 0.2) ? size - 0.05 : size);
         }
         else{
-            size = ((size < 0.38) ? size + 0.02 : size);
-            score--;
+            size = ((size < 0.35) ? size + 0.05 : size);
+            if (score > 0) score--;
             speed = ((speed > 2) ? speed - 0.5 : speed);
         }
-        points = [];
-        colors = [];
+        lastThree = 3;
+        sleep(250);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        //sleep for quarter of a second before generating a new polygon
+        generatePolygon();
     }
 }
 
@@ -224,4 +227,9 @@ function timeElapsed() {
   // get seconds
   var seconds = Math.round(timeDiff);
   return seconds;
+}
+
+function sleep(delay) {
+    var start = new Date().getTime();
+    while (new Date().getTime() < start + delay);
 }
